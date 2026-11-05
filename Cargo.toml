@@ -1,0 +1,11 @@
+[package]
+name = "horizon-mod-twinsession"
+version = "1.0.0"
+edition = "2024"
+license = "CC0-1.0"
+publish = false
+description = "Allow several joins from one account on a Horizon server: a Rust port of TwinSession."
+
+# The mod logic and its tests: the same file the bundle adds to the game.
+[lib]
+path = "mixins/twinsession/runtime.rs"
