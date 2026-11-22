@@ -1,42 +1,29 @@
-# twinsession (Horizon port)
+# TwinSession (Horizon Rust port)
 
 A Rust port of [TwinSession](https://github.com/TheMisterFish/Fabric_TwinSession)
-(CC0-1.0, by TheMisterFish), which lets several clients join one server from the
-same Minecraft account: the server mints each duplicate a fresh UUID and name so
-they play side by side without kicking the original.
+(CC0-1.0, by TheMisterFish). Ported for the Horizon client by sparticle.
 
-## Ported (1:1)
+## Status
 
-- The twin registry: live duplicates per original UUID, lowest free join
-  position, cleanup on leave (TwinSession.twinMap, playerLeft).
-- createNewGameProfile: the N_name name truncated to 16 chars, its MD5-v3 UUID
-  (hand-rolled MD5, byte-exact with Java MessageDigest), the texture property
-  copied when copyTexture is on, the number prefix toggle.
-- canJoin with the original inequality (size + 1 < maxPlayers).
-- The spawn-nearby placement: sample points in the configured radius, relaxed
-  minimum distance, safe-Y scan top down, nether-roof guard, creative-flight
-  passthrough, source-position fallback.
-- All seven config values with the original defaults (maxPlayers 8,
-  autoWhitelist on, autoOp on, spawnNearPlayer on, radius 10, copyTexture on,
-  prefixWithNumber on).
+The twin registry, profile minting (MD5-v3 UUIDs), canJoin and the spawn
+placement are carried 1:1 and tested. Nothing calls them yet: Horizon's
+native_player_login can cancel a join but cannot rewrite the joining player's
+profile (horizon-rust/horizon #10057), which is the heart of the mod, so the
+mod does nothing in game yet. Ships as the tested 1:1 library until that
+surface lands.
 
-## Horizon seam
+The spawn-sampling loop is bounded so a radius of 2 or less terminates instead
+of stalling; the autoOp default stays upstream's, with the gate documented (a
+twin gets op only if the original account already has it) for when the wiring
+lands.
 
-The native-mod API hears a joining player once accepted through
-native_player_login (API 172) and may cancel the join with a reason, but it
-cannot rewrite the joining player's profile. The heart of TwinSession is that
-rewrite: the duplicate's UUID is replaced before placement so two sessions of
-one account coexist. Without it the port can detect a duplicate join and refuse
-over-cap joins with the original reason, but cannot mint the twin identity.
+## Build
 
-Filed on horizon-rust/horizon as an API ask (profile rewrite in the login
-negotiation). When it lands, the wiring is: hear the login, look up the
-original in the registry, mint the twin profile, hand it to the server; on
-placeNewPlayer copy op status and game mode from the source and teleport near
-them when spawnNearPlayer is on and they have no saved data; on leave, clean
-the registry.
+`cargo test` (16 tests). Package: the repo files zipped as
+`twinsession-1.0.0.hmod`. Pinned to Horizon
+f00125f61f794aaa3d4e950d301f353b35b6ee3d and horizon-mixins
+e59da9094f0c2fdda6c627fe9eff22dec6a906f0.
 
-## License
+## Licence
 
-Upstream TwinSession: CC0-1.0 (TheMisterFish). This port carries the same
-license; see LICENSE.
+CC0-1.0 (see LICENSE).

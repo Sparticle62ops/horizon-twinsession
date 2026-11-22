@@ -1,0 +1,13 @@
+id = "twinsession"
+name = "twinsession"
+version = "1.0.0"
+description = "A Rust port of [TwinSession](https://github.com/TheMisterFish/Fabric_TwinSession)\n(CC0-1.0, by TheMisterFish), which lets several clients join one server from the\nsame Minecraft account: the server mints each duplicate a fresh UUID and name so\nthey play side by side without kicking the original.\n\n## Ported (1:1)\n\n- The twin registry: live duplicates per original UUID, lowest free join\n  position, cleanup on leave (TwinSession.twinMap, playerLeft).\n- createNewGameProfile: the N_name name truncated to 16 chars, its MD5-v3 UUID\n  (hand-rolled MD5, byte-exact with Java MessageDigest), the texture property\n  copied when copyTexture is on, the number prefix toggle.\n- canJoin with the original inequality (size + 1 < maxPlayers).\n- The spawn-nearby placement: sample points in the configured radius, relaxed\n  minimum distance, safe-Y scan top down, nether-roof guard, creative-flight\n  passthrough, source-position fallback; the sampling loop is bounded so a\n  radius of 2 or less terminates instead of stalling.\n- All seven config values with the original defaults (maxPlayers 8,\n  autoWhitelist on, autoOp on, spawnNearPlayer on, radius 10, copyTexture on,\n  prefixWithNumber on).\n\n## Horizon seam\n\nThe native-mod API hears a joining player once accepted through\nnative_player_login (API 172) and may cancel the join with a reason, but it\ncannot rewrite the joining player's profile. The heart of TwinSession is that\nrewrite: the duplicate's UUID is replaced before placement so two sessions of\none account coexist. Without it the port can detect a duplicate and place it\nnear the original, but cannot mint the fresh UUID and profile, so the mod does\nnothing in game yet. It ships as the tested 1:1 library until that surface\nlands (horizon-rust/horizon #10057).\n\nPinned to Horizon f00125f61f794aaa3d4e950d301f353b35b6ee3d and horizon-mixins e59da9094f0c2fdda6c627fe9eff22dec6a906f0.\n\nLicence: CC0-1.0. Source: https://github.com/Sparticle62ops/horizon-twinsession\n"
+authors = ["TheMisterFish", "sparticle"]
+api = "0.2"
+side = "both"
+capabilities = ["registries"]
+
+[native]
+game = "26.3"
+horizon = "f00125f61f794aaa3d4e950d301f353b35b6ee3d"
+mixins = "e59da9094f0c2fdda6c627fe9eff22dec6a906f0"
